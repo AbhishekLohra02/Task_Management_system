@@ -12,16 +12,29 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Task_Management_System">
         <activity
-            android:name=".MainActivity"
-            android:exported="true"
-            android:label="@string/app_name"
-            android:theme="@style/Theme.Task_Management_System">
+            android:name=".TeamListPage"
+            android:exported="false" />
+        <activity
+            android:name=".Manager_dashboard"
+            android:exported="false" /> <!-- ⭐ Correct launcher activity with FULL path -->
+        <activity
+            android:name=".ui.screens.SigninActivity"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity>
+        </activity> <!-- Other screens -->
+        <activity
+            android:name=".ManagerDashboard"
+            android:exported="false" />
+        <activity
+            android:name=".SuperAdmin_Dashboard"
+            android:exported="false" />
+        <activity
+            android:name=".MainActivity"
+            android:exported="false" />
     </application>
 
 </manifest>
