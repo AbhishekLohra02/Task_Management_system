@@ -11,7 +11,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 
 
-// Simple model
+
 data class MemberProgress(
     val name: String,
     val task: String,
@@ -25,7 +25,7 @@ fun ManagerDashboardScreen() {
 
     var showProgress by remember { mutableStateOf(false) }
 
-    // sample team data
+
     val members = listOf(
         MemberProgress("Abhishek", "UI Design", "Completed"),
         MemberProgress("Rohit", "API Development", "In Progress"),
