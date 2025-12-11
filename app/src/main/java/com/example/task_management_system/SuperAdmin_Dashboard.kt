@@ -1,4 +1,4 @@
-package com.example.task_management_system.ui.screens
+package com.example.task_management_system
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -11,7 +11,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 
 
-// Simple data class for demonstration
+
 data class TeamData(val name: String, val progress: String)
 
 
@@ -19,7 +19,7 @@ data class TeamData(val name: String, val progress: String)
 @Composable
 fun SuperAdminScreen() {
 
-    // State switching between screens
+
     var screenState by remember { mutableStateOf("dashboard") }
     var selectedTeam by remember { mutableStateOf<TeamData?>(null) }
 
@@ -39,17 +39,17 @@ fun SuperAdminScreen() {
 
         when (screenState) {
 
-            // MAIN DASHBOARD
+
             "dashboard" -> {
                 SuperAdminDashboardContentPreview(
                     modifier = Modifier.padding(padding),
-                    onCreateTeam = {},
                     onCreateManager = {},
+                    onCreateTeam = {},
                     onViewTeams = { screenState = "teams" }
                 )
             }
 
-            // TEAM LIST SCREEN
+
             "teams" -> {
                 TeamListScreen(
                     teams = teamList,
@@ -61,7 +61,7 @@ fun SuperAdminScreen() {
                 )
             }
 
-            // TEAM DETAIL SCREEN
+
             "teamDetail" -> {
                 TeamDetailScreen(
                     team = selectedTeam!!,

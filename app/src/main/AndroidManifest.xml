@@ -1,40 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <application
         android:allowBackup="true"
-        android:dataExtractionRules="@xml/data_extraction_rules"
-        android:fullBackupContent="@xml/backup_rules"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
-        android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Task_Management_System">
-        <activity
-            android:name=".TeamListPage"
-            android:exported="false" />
-        <activity
-            android:name=".Manager_dashboard"
-            android:exported="false" /> <!-- ⭐ Correct launcher activity with FULL path -->
-        <activity
-            android:name=".ui.screens.SigninActivity"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
 
-                <category android:name="android.intent.category.LAUNCHER" />
+        <!-- Launcher Activity - your login page -->
+        <activity
+            android:name=".SigninActivity"
+            android:exported="true">
+
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
-        </activity> <!-- Other screens -->
+
+        </activity>
+
         <activity
-            android:name=".ManagerDashboard"
-            android:exported="false" />
-        <activity
-            android:name=".SuperAdmin_Dashboard"
-            android:exported="false" />
-        <activity
-            android:name=".MainActivity"
-            android:exported="false" />
+            android:name=".ManagerDashboardActivity"
+            android:exported="false"/>
+
     </application>
 
 </manifest>

@@ -1,5 +1,8 @@
-package com.example.task_management_system.ui.screens
+package com.example.task_management_system
 
+import android.os.Bundle
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Button
@@ -10,13 +13,51 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import com.example.task_management_system.ui.theme.Task_Management_SystemTheme
 
-@Preview(showBackground = true)
+class SigninActivity : ComponentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        setContent {
+            Task_Management_SystemTheme {
+
+                val navController = rememberNavController()
+
+                NavHost(
+                    navController = navController,
+                    startDestination = "signin"
+                ) {
+                    composable("signin") {
+                        SigninPageContent(
+                            onSignInClick = {
+                                navController.navigate("managerDashboard")
+                            }
+                        )
+                    }
+
+                    // Manager dashboard
+                    composable("managerDashboard") {
+                        ManagerDashboardScreen(
+
+                        )
+
+
+                    }
+                }
+            }
+        }
+    }
+}
+
 @Composable
-fun SigninPreview() {
-
+fun SigninPageContent(
+    onSignInClick: () -> Unit
+) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
 
@@ -54,7 +95,7 @@ fun SigninPreview() {
         Spacer(modifier = Modifier.height(16.dp))
 
         Button(
-            onClick = { /* Preview only – no navigation */ },
+            onClick = { onSignInClick() },
             modifier = Modifier
                 .fillMaxWidth()
                 .height(48.dp)

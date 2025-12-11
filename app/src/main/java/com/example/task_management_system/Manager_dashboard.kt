@@ -1,5 +1,8 @@
-package com.example.task_management_system.ui.screens
+package com.example.task_management_system
 
+import android.os.Bundle
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -9,9 +12,19 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.example.task_management_system.ui.theme.Task_Management_SystemTheme
 
+class ManagerDashboardActivity : ComponentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
 
-// Simple model
+        setContent {
+            Task_Management_SystemTheme {
+                ManagerDashboardScreen()   // <--- your composable here
+            }
+        }
+    }
+}
 data class MemberProgress(
     val name: String,
     val task: String,
