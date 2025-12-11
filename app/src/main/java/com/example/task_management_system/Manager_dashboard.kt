@@ -38,7 +38,7 @@ fun ManagerDashboardScreen() {
 
     var showProgress by remember { mutableStateOf(false) }
 
-    // sample team data
+
     val members = listOf(
         MemberProgress("Abhishek", "UI Design", "Completed"),
         MemberProgress("Rohit", "API Development", "In Progress"),
