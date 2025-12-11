@@ -13,6 +13,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -22,40 +23,33 @@ import com.example.task_management_system.ui.theme.Task_Management_SystemTheme
 class SigninActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
         setContent {
             Task_Management_SystemTheme {
-
-                val navController = rememberNavController()
-
-                NavHost(
-                    navController = navController,
-                    startDestination = "signin"
-                ) {
-                    composable("signin") {
-                        SigninPageContent(
-                            onSignInClick = {
-                                navController.navigate("managerDashboard")
-                            }
-                        )
-                    }
-
-                    // Manager dashboard
-                    composable("managerDashboard") {
-                        ManagerDashboardScreen(
-
-                        )
-
-
-                    }
-                }
+                AppNavigation()
             }
         }
     }
 }
 
 @Composable
-fun SigninPageContent(
+fun AppNavigation() {
+    val navController = rememberNavController()
+    NavHost(navController = navController, startDestination = "signin") {
+        composable("signin") {
+            SigninPageContentPreview (
+                onSignInClick = { navController.navigate("managerDashboard") }
+            )
+        }
+        composable("managerDashboard") {
+            // Ensure ManagerDashboardScreen is a @Composable function
+            // and is in the correct package.
+            ManagerDashboardScreen()
+        }
+    }
+}
+@Preview
+@Composable
+fun SigninPageContentPreview(
     onSignInClick: () -> Unit
 ) {
     var email by remember { mutableStateOf("") }
@@ -95,7 +89,7 @@ fun SigninPageContent(
         Spacer(modifier = Modifier.height(16.dp))
 
         Button(
-            onClick = { onSignInClick() },
+            onClick = onSignInClick,
             modifier = Modifier
                 .fillMaxWidth()
                 .height(48.dp)

@@ -8,21 +8,19 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Task_Management_System">
 
-        <!-- Launcher Activity - your login page -->
         <activity
             android:name=".SigninActivity"
-            android:exported="true">
-
+            android:exported="true"
+            android:theme="@style/Theme.Task_Management_System">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
-                <category android:name="android.intent.category.LAUNCHER"/>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-
         </activity>
 
         <activity
-            android:name=".ManagerDashboardActivity"
-            android:exported="false"/>
+            android:name=".MainActivity"
+            android:exported="false" />
 
     </application>
 
