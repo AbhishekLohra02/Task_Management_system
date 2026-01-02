@@ -2,9 +2,6 @@
 
 package com.example.task_management_system
 
-import android.os.Bundle
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -35,15 +32,6 @@ val textColorPrimary = Color(0xFF212121)
 val textColorSecondary = Color(0xFF757575)
 val accentColorError = Color(0xFFD32F2F)
 
-class TaskActivity : ComponentActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContent {
-            TaskDetailScreen()
-        }
-    }
-}
-
 data class TaskDetail(
     val title: String,
     val description: String,
@@ -52,13 +40,14 @@ data class TaskDetail(
 )
 
 @Composable
-fun TaskDetailScreen() {
+fun TaskDetailScreen(
+    onLogout: () -> Unit = {}
+) {
     var task by remember {
         mutableStateOf(
             TaskDetail(
                 title = "TASK: Mobile Project",
                 description = "You have to submit the Mobile application Project before Christmas break",
-                // 1. CORRECTION : Statut par défaut mis à "In-Progress"
                 status = "In-Progress",
                 userComment = ""
             )
@@ -77,7 +66,7 @@ fun TaskDetailScreen() {
                     )
                 },
                 actions = {
-                    TextButton(onClick = { /* TODO: Logique de déconnexion */ }) {
+                    TextButton(onClick = onLogout) {
                         Text("Log Out", color = onPrimaryColor)
                     }
                 },
@@ -201,7 +190,6 @@ fun LabeledSection(label: String, content: @Composable () -> Unit) {
 
 @Composable
 fun StatusSelector(selectedStatus: String, onStatusChange: (String) -> Unit) {
-    // "In-Progress" est bien dans la liste pour correspondre au statut par défaut
     val statusOptions = listOf("To Do", "In-Progress", "Done")
 
     Surface(
@@ -235,7 +223,6 @@ fun StatusSelector(selectedStatus: String, onStatusChange: (String) -> Unit) {
                     Text(
                         text = status,
                         color = if (status == selectedStatus) primaryColor else textColorSecondary,
-                        // CORRECTION : Remplacement de selectedSession par selectedStatus
                         fontWeight = if (status == selectedStatus) FontWeight.Bold else FontWeight.Normal
                     )
                 }
