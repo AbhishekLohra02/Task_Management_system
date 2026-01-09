@@ -21,6 +21,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.task_management_system.data.Task
 
 // --- PALETTE DE COULEURS PROFESSIONNELLES ---
 val primaryColor = Color(0xFF0D47A1)
@@ -32,20 +33,13 @@ val textColorPrimary = Color(0xFF212121)
 val textColorSecondary = Color(0xFF757575)
 val accentColorError = Color(0xFFD32F2F)
 
-data class TaskDetail(
-    val title: String,
-    val description: String,
-    var status: String,
-    var userComment: String
-)
-
 @Composable
 fun TaskDetailScreen(
     onLogout: () -> Unit = {}
 ) {
     var task by remember {
         mutableStateOf(
-            TaskDetail(
+            Task(
                 title = "TASK: Mobile Project",
                 description = "You have to submit the Mobile application Project before Christmas break",
                 status = "In-Progress",

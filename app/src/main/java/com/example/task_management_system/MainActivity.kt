@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
@@ -13,6 +14,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -81,11 +84,26 @@ fun AppNavigation() {
         composable("teamList") {
             TeamListScreen(
                 onTeamSelected = { team ->
-                    navController.navigate("taskDetail")
+                    navController.navigate("userTasks")
                 },
                 onLogout = {
                     navController.navigate("signin") {
                         popUpTo("teamList") { inclusive = true }
+                    }
+                }
+            )
+        }
+        composable("userTasks") {
+            UserTasksScreen(
+                onBack = {
+                    navController.popBackStack()
+                },
+                onTaskSelected = { taskId ->
+                    navController.navigate("taskDetail")
+                },
+                onLogout = {
+                    navController.navigate("signin") {
+                        popUpTo("userTasks") { inclusive = true }
                     }
                 }
             )
@@ -103,14 +121,21 @@ fun AppNavigation() {
 @Composable
 fun SplashScreen(onTimeout: () -> Unit) {
     LaunchedEffect(key1 = true) {
-        delay(5000) // Delay from your SplashScreen.kt
+        delay(3000) // 3 secondes
         onTimeout()
     }
 
     Box(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color(0xFF0D47A1)), 
         contentAlignment = Alignment.Center
     ) {
-        Text("ProjecManag", fontSize = 48.sp)
+        Text(
+            text = "ProjecManag",
+            fontSize = 40.sp,
+            color = Color.White,
+            fontWeight = FontWeight.Bold
+        )
     }
 }

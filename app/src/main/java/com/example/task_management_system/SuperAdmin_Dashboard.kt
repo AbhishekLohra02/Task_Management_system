@@ -9,8 +9,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-
-data class TeamData(val name: String, val progress: String)
+import com.example.task_management_system.data.Team
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -18,12 +17,12 @@ fun SuperAdminScreen(
     onLogout: () -> Unit
 ) {
     var screenState by remember { mutableStateOf("dashboard") }
-    var selectedTeam by remember { mutableStateOf<TeamData?>(null) }
+    var selectedTeam by remember { mutableStateOf<Team?>(null) }
 
     val teamList = listOf(
-        TeamData("Team Alpha", "UI Design Completed"),
-        TeamData("Team Beta", "API Development In Progress"),
-        TeamData("Team Gamma", "Testing Started")
+        Team(id = "1", name = "Team Alpha", description = "UI Design Completed"),
+        Team(id = "2", name = "Team Beta", description = "API Development In Progress"),
+        Team(id = "3", name = "Team Gamma", description = "Testing Started")
     )
 
     Scaffold(
@@ -49,7 +48,7 @@ fun SuperAdminScreen(
                 )
             }
             "teams" -> {
-                TeamListScreen(
+                AdminTeamListScreen(
                     teams = teamList,
                     modifier = Modifier.padding(padding),
                     onTeamClick = { team ->
@@ -59,7 +58,7 @@ fun SuperAdminScreen(
                 )
             }
             "teamDetail" -> {
-                TeamDetailScreen(
+                AdminTeamDetailScreen(
                     team = selectedTeam!!,
                     modifier = Modifier.padding(padding),
                     onBack = { screenState = "teams" }
@@ -106,10 +105,10 @@ fun SuperAdminDashboardContentPreview(
 }
 
 @Composable
-fun TeamListScreen(
-    teams: List<TeamData>,
+fun AdminTeamListScreen(
+    teams: List<Team>,
     modifier: Modifier,
-    onTeamClick: (TeamData) -> Unit
+    onTeamClick: (Team) -> Unit
 ) {
     LazyColumn(
         modifier = modifier
@@ -130,8 +129,8 @@ fun TeamListScreen(
 }
 
 @Composable
-fun TeamDetailScreen(
-    team: TeamData,
+fun AdminTeamDetailScreen(
+    team: Team,
     modifier: Modifier,
     onBack: () -> Unit
 ) {
@@ -142,7 +141,7 @@ fun TeamDetailScreen(
     ) {
         Text(team.name, fontWeight = FontWeight.Bold)
         Spacer(modifier = Modifier.height(10.dp))
-        Text("Progress: ${team.progress}")
+        Text("Description: ${team.description}")
         Spacer(modifier = Modifier.height(30.dp))
         Button(onClick = onBack) {
             Text("Back to Teams")

@@ -9,12 +9,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-
-data class MemberProgress(
-    val name: String,
-    val task: String,
-    val status: String
-)
+import com.example.task_management_system.data.Task
+import com.example.task_management_system.data.User
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -23,10 +19,11 @@ fun ManagerDashboardScreen(
 ) {
     var showProgress by remember { mutableStateOf(false) }
 
-    val members = listOf(
-        MemberProgress("Abhishek", "UI Design", "Completed"),
-        MemberProgress("Rohit", "API Development", "In Progress"),
-        MemberProgress("Virat", "Testing", "Pending")
+    // Mock data using the formal models
+    val taskList = listOf(
+        Task(title = "UI Design", status = "Completed", assignedTo = "Abhishek"),
+        Task(title = "API Development", status = "In Progress", assignedTo = "Rohit"),
+        Task(title = "Testing", status = "Pending", assignedTo = "Virat")
     )
 
     Scaffold(
@@ -43,7 +40,7 @@ fun ManagerDashboardScreen(
     ) { padding ->
         if (showProgress) {
             TeamProgressScreen(
-                members,
+                taskList,
                 Modifier.padding(padding),
                 onBack = { showProgress = false }
             )
@@ -87,7 +84,7 @@ fun ManagerMenuScreen(
 
 @Composable
 fun TeamProgressScreen(
-    list: List<MemberProgress>,
+    tasks: List<Task>,
     modifier: Modifier = Modifier,
     onBack: () -> Unit
 ) {
@@ -99,14 +96,14 @@ fun TeamProgressScreen(
         Button(onClick = onBack) { Text("Back") }
         Spacer(modifier = Modifier.height(16.dp))
         LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            items(list) { user ->
+            items(tasks) { task ->
                 Card(
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
-                        Text(user.name, fontWeight = FontWeight.Bold)
-                        Text("Task: ${user.task}")
-                        Text("Status: ${user.status}")
+                        Text("Member: ${task.assignedTo}", fontWeight = FontWeight.Bold)
+                        Text("Task: ${task.title}")
+                        Text("Status: ${task.status}")
                     }
                 }
             }

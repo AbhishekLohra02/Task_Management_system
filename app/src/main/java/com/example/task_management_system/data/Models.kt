@@ -14,6 +14,7 @@ data class User(
 data class Team(
     val id: String = "",
     val name: String = "",
+    val description: String = "",
     val managerId: String = "", // The manager leading this team
     val members: List<String> = emptyList() // List of User UIDs
 )

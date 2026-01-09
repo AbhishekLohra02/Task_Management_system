@@ -85,7 +85,8 @@ fun TeamItem(team: Team, onClick: () -> Unit) {
                 text = team.name,
                 style = MaterialTheme.typography.titleMedium
             )
-            if (team.description.isNotEmpty()) {
+
+            if (team.description.isNotBlank()) {
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
                     text = team.description,
