@@ -68,21 +68,93 @@ fun AppNavigation() {
             })
         }
         composable("superAdminDashboard") {
-            SuperAdminScreen(onLogout = {
-                navController.navigate("signin") {
-                    popUpTo("superAdminDashboard") { inclusive = true }
+            SuperAdminScreen(
+                onBack = { 
+                    navController.navigate("signin") {
+                        popUpTo("superAdminDashboard") { inclusive = true }
+                    }
+                },
+                onCreateManager = { navController.navigate("createManager") },
+                onDeleteManager = { navController.navigate("listeManager") },
+                onLogout = {
+                    navController.navigate("signin") {
+                        popUpTo("superAdminDashboard") { inclusive = true }
+                    }
                 }
-            })
+            )
+        }
+        composable("createManager") {
+            CreateManagerScreen(
+                onBack = { navController.popBackStack() },
+                onManagerCreated = { navController.popBackStack() }
+            )
+        }
+        composable("listeManager") {
+            ListeManagerScreen(
+                onBack = { navController.popBackStack() }
+            )
         }
         composable("managerDashboard") {
-            ManagerDashboardScreen(onLogout = {
-                navController.navigate("signin") {
-                    popUpTo("managerDashboard") { inclusive = true }
+            ManagerDashboardScreen(
+                onBack = { 
+                    navController.navigate("signin") {
+                        popUpTo("managerDashboard") { inclusive = true }
+                    }
+                },
+                onCreateUser = { navController.navigate("createUser") },
+                onCreateTeam = { navController.navigate("createTeam") },
+                onCreateTask = { navController.navigate("createTask") },
+                onViewProgress = { navController.navigate("viewProgress") },
+                onViewUserList = { navController.navigate("userList") },
+                onViewTeamList = { navController.navigate("teamList") },
+                onViewTaskList = { navController.navigate("taskList") },
+                onLogout = {
+                    navController.navigate("signin") {
+                        popUpTo("managerDashboard") { inclusive = true }
+                    }
                 }
-            })
+            )
+        }
+        composable("createUser") {
+            CreateUserScreen(
+                onBack = { navController.popBackStack() },
+                onUserCreated = { navController.popBackStack() }
+            )
+        }
+        composable("createTeam") {
+            CreateTeamScreen(
+                onBack = { navController.popBackStack() },
+                onTeamCreated = { navController.popBackStack() }
+            )
+        }
+        composable("createTask") {
+            CreateTaskScreen(
+                onBack = { navController.popBackStack() },
+                onTaskCreated = { navController.popBackStack() }
+            )
+        }
+        composable("viewProgress") {
+            TeamProgressScreen(
+                onBack = { navController.popBackStack() }
+            )
+        }
+        composable("userList") {
+            UserListScreen(
+                onBack = { navController.popBackStack() }
+            )
+        }
+        composable("taskList") {
+            TaskListScreen(
+                onBack = { navController.popBackStack() }
+            )
         }
         composable("teamList") {
             TeamListScreen(
+                onBack = { 
+                    navController.navigate("signin") {
+                        popUpTo("teamList") { inclusive = true }
+                    }
+                },
                 onTeamSelected = { team ->
                     navController.navigate("userTasks")
                 },
@@ -96,7 +168,9 @@ fun AppNavigation() {
         composable("userTasks") {
             UserTasksScreen(
                 onBack = {
-                    navController.popBackStack()
+                    navController.navigate("teamList") {
+                        popUpTo("userTasks") { inclusive = true }
+                    }
                 },
                 onTaskSelected = { taskId ->
                     navController.navigate("taskDetail")
@@ -109,11 +183,18 @@ fun AppNavigation() {
             )
         }
         composable("taskDetail") {
-            TaskDetailScreen(onLogout = {
-                navController.navigate("signin") {
-                    popUpTo("taskDetail") { inclusive = true }
+            TaskDetailScreen(
+                onBack = { 
+                    navController.navigate("userTasks") {
+                        popUpTo("taskDetail") { inclusive = true }
+                    }
+                },
+                onLogout = {
+                    navController.navigate("signin") {
+                        popUpTo("taskDetail") { inclusive = true }
+                    }
                 }
-            })
+            )
         }
     }
 }
@@ -121,21 +202,14 @@ fun AppNavigation() {
 @Composable
 fun SplashScreen(onTimeout: () -> Unit) {
     LaunchedEffect(key1 = true) {
-        delay(3000) // 3 secondes
+        delay(3000)
         onTimeout()
     }
 
     Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color(0xFF0D47A1)), 
+        modifier = Modifier.fillMaxSize().background(Color(0xFF0D47A1)),
         contentAlignment = Alignment.Center
     ) {
-        Text(
-            text = "ProjecManag",
-            fontSize = 40.sp,
-            color = Color.White,
-            fontWeight = FontWeight.Bold
-        )
+        Text("ProjecManag", fontSize = 40.sp, color = Color.White, fontWeight = FontWeight.Bold)
     }
 }

@@ -6,10 +6,10 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
@@ -22,6 +22,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.task_management_system.data.Task
+import kotlinx.coroutines.launch
 
 // --- PALETTE DE COULEURS PROFESSIONNELLES ---
 val primaryColor = Color(0xFF0D47A1)
@@ -35,8 +36,12 @@ val accentColorError = Color(0xFFD32F2F)
 
 @Composable
 fun TaskDetailScreen(
+    onBack: () -> Unit = {},
     onLogout: () -> Unit = {}
 ) {
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
+    
     var task by remember {
         mutableStateOf(
             Task(
@@ -50,6 +55,7 @@ fun TaskDetailScreen(
 
     Scaffold(
         containerColor = backgroundColor,
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         topBar = {
             CenterAlignedTopAppBar(
                 title = {
@@ -58,6 +64,15 @@ fun TaskDetailScreen(
                         color = onPrimaryColor,
                         fontWeight = FontWeight.Bold
                     )
+                },
+                navigationIcon = {
+                    IconButton(onClick = onBack) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Back",
+                            tint = onPrimaryColor
+                        )
+                    }
                 },
                 actions = {
                     TextButton(onClick = onLogout) {
@@ -145,7 +160,11 @@ fun TaskDetailScreen(
             Spacer(modifier = Modifier.weight(1f))
 
             Button(
-                onClick = { /* TODO: Logique de sauvegarde */ },
+                onClick = {
+                    scope.launch {
+                        snackbarHostState.showSnackbar("progress saved")
+                    }
+                },
                 colors = ButtonDefaults.buttonColors(
                     containerColor = primaryColor,
                     contentColor = onPrimaryColor
