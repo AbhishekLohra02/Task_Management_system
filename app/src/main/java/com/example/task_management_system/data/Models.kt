@@ -1,7 +1,4 @@
-
 package com.example.task_management_system.data
-
-
 
 data class User(
     val uid: String = "",
@@ -14,6 +11,7 @@ data class User(
 data class Team(
     val id: String = "",
     val name: String = "",
+    val description: String = "", // Added description field
     val managerId: String = "", // The manager leading this team
     val members: List<String> = emptyList() // List of User UIDs
 )
