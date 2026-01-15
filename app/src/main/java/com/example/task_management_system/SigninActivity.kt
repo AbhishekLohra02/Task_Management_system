@@ -29,7 +29,7 @@ private val signinBackgroundColor = Color(0xFFF5F7FA)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SigninScreen(onSignInSuccess: (String) -> Unit) {
-    // --- DATA STATE (From Your Logic) ---
+
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     val repository = remember { FirebaseRepository() } // Kept your repo
@@ -54,11 +54,11 @@ fun SigninScreen(onSignInSuccess: (String) -> Unit) {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            // Vic's UI Headers
+
             Text(text = "WELCOME BACK", fontSize = 28.sp, fontWeight = FontWeight.Bold, color = signinPrimaryColor)
             Text(text = "Sign in to continue", color = Color.Gray, fontSize = 16.sp, modifier = Modifier.padding(bottom = 40.dp))
 
-            // Vic's Outlined Style + Your State Binding
+
             OutlinedTextField(
                 value = email,
                 onValueChange = { email = it },
@@ -80,14 +80,14 @@ fun SigninScreen(onSignInSuccess: (String) -> Unit) {
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Your Error Message Logic
+
             if (errorMessage.isNotBlank()) {
                 Text(text = errorMessage, color = Color.Red, modifier = Modifier.padding(vertical = 8.dp))
             }
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Loading Indicator
+
             if (isloading) {
                 CircularProgressIndicator(color = signinPrimaryColor)
             } else {
