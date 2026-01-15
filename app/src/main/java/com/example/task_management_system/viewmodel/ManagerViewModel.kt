@@ -2,6 +2,7 @@ package com.example.task_management_system.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.task_management_system.data.Task
 import com.example.task_management_system.data.Team
 import com.example.task_management_system.data.User
 import com.example.task_management_system.data.repository.FirebaseRepository
@@ -10,15 +11,18 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-class SuperAdminViewModel : ViewModel() {
+class ManagerViewModel : ViewModel() {
 
     private val repository = FirebaseRepository()
+
+    private val _teamTasks = MutableStateFlow<List<Task>>(emptyList())
+    val teamTasks: StateFlow<List<Task>> = _teamTasks.asStateFlow()
 
     private val _teams = MutableStateFlow<List<Team>>(emptyList())
     val teams: StateFlow<List<Team>> = _teams.asStateFlow()
 
-    private val _managers = MutableStateFlow<List<User>>(emptyList())
-    val managers: StateFlow<List<User>> = _managers.asStateFlow()
+    private val _users = MutableStateFlow<List<User>>(emptyList())
+    val users: StateFlow<List<User>> = _users.asStateFlow()
 
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
@@ -33,42 +37,35 @@ class SuperAdminViewModel : ViewModel() {
     fun fetchAllData() {
         viewModelScope.launch {
             _isLoading.value = true
-            fetchTeams()
-            fetchManagers()
+            
+            // Fetch Teams
+            val teamsResult = repository.getTeams()
+            if (teamsResult.isSuccess) {
+                _teams.value = teamsResult.getOrDefault(emptyList())
+            }
+
+            // Fetch Users
+            val usersResult = repository.getUsers()
+            if (usersResult.isSuccess) {
+                _users.value = usersResult.getOrDefault(emptyList())
+            }
+
+            // Fetch All Tasks (for progress tracking)
+            val tasksResult = repository.getAllTasks()
+            if (tasksResult.isSuccess) {
+                _teamTasks.value = tasksResult.getOrDefault(emptyList())
+            }
+            
             _isLoading.value = false
         }
     }
 
-    private suspend fun fetchTeams() {
-        val result = repository.getTeams()
-        if (result.isSuccess) {
-            _teams.value = result.getOrDefault(emptyList())
-        }
-    }
-
-    private suspend fun fetchManagers() {
-        val result = repository.getUsersByRole("Manager")
-        if (result.isSuccess) {
-            _managers.value = result.getOrDefault(emptyList())
-        }
-    }
-
-    fun createManager(name: String, email: String, password: String) {
+    fun createUser(user: User, password: String) {
         viewModelScope.launch {
             _isLoading.value = true
-            val user = User(name = name, email = email, role = "Manager")
             val result = repository.registerUser(user, password)
             _operationStatus.value = result
-            if (result.isSuccess) fetchManagers()
-            _isLoading.value = false
-        }
-    }
-
-    fun deleteManager(uid: String) {
-        viewModelScope.launch {
-            _isLoading.value = true
-            val result = repository.deleteUser(uid)
-            if (result.isSuccess) fetchManagers()
+            if (result.isSuccess) fetchAllData()
             _isLoading.value = false
         }
     }
@@ -78,7 +75,17 @@ class SuperAdminViewModel : ViewModel() {
             _isLoading.value = true
             val result = repository.createTeam(teamName, managerId)
             _operationStatus.value = result
-            if (result.isSuccess) fetchTeams()
+            if (result.isSuccess) fetchAllData()
+            _isLoading.value = false
+        }
+    }
+
+    fun createTask(task: Task) {
+        viewModelScope.launch {
+            _isLoading.value = true
+            val result = repository.createTask(task)
+            _operationStatus.value = result
+            if (result.isSuccess) fetchAllData()
             _isLoading.value = false
         }
     }

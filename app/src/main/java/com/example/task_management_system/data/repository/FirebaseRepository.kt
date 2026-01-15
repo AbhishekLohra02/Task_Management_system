@@ -1,6 +1,4 @@
-
 package com.example.task_management_system.data.repository
-
 
 import com.example.task_management_system.data.Task
 import com.example.task_management_system.data.Team
@@ -14,7 +12,7 @@ class FirebaseRepository {
     private val auth: FirebaseAuth = FirebaseAuth.getInstance()
     private val firestore: FirebaseFirestore = FirebaseFirestore.getInstance()
 
-    // --- Authentication ---
+
 
     suspend fun login(email: String, password: String): Result<User> {
         return try {
@@ -27,7 +25,7 @@ class FirebaseRepository {
             if (user != null) {
                 Result.success(user)
             } else {
-                Result.failure(Exception("User data not found"))
+                Result.failure(Exception("User not found"))
             }
         } catch (e: Exception) {
             Result.failure(e)
@@ -44,11 +42,6 @@ class FirebaseRepository {
 
     suspend fun registerUser(user: User, password: String): Result<Boolean> {
         return try {
-            // Note: In a real app, you might use a secondary app instance or Cloud Functions
-            // to create users without logging out the admin. 
-            // Here, we assume the admin is creating the user.
-            
-            // WARNING: This will sign in the new user!
             val authResult = auth.createUserWithEmailAndPassword(user.email, password).await()
             val uid = authResult.user?.uid ?: throw Exception("Failed to create user")
 
@@ -56,6 +49,52 @@ class FirebaseRepository {
             firestore.collection("users").document(uid).set(newUser).await()
 
             Result.success(true)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun getUsers(): Result<List<User>> {
+        return try {
+            val snapshot = firestore.collection("users").get().await()
+            val users = snapshot.toObjects(User::class.java)
+            Result.success(users)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun getUsersByRole(role: String): Result<List<User>> {
+        return try {
+            val snapshot = firestore.collection("users")
+                .whereEqualTo("role", role)
+                .get()
+                .await()
+            val users = snapshot.toObjects(User::class.java)
+            Result.success(users)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun deleteUser(uid: String): Result<Boolean> {
+        return try {
+            // Note: This only deletes from Firestore. Deleting from Auth requires Admin SDK or Cloud Functions
+            firestore.collection("users").document(uid).delete().await()
+            Result.success(true)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun getUsersByTeam(teamId: String): Result<List<User>> {
+        return try {
+            val snapshot = firestore.collection("users")
+                .whereEqualTo("teamId", teamId)
+                .get()
+                .await()
+            val users = snapshot.toObjects(User::class.java)
+            Result.success(users)
         } catch (e: Exception) {
             Result.failure(e)
         }
@@ -92,6 +131,16 @@ class FirebaseRepository {
             val newTask = task.copy(id = taskId)
             firestore.collection("tasks").document(taskId).set(newTask).await()
             Result.success(true)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun getAllTasks(): Result<List<Task>> {
+        return try {
+            val snapshot = firestore.collection("tasks").get().await()
+            val tasks = snapshot.toObjects(Task::class.java)
+            Result.success(tasks)
         } catch (e: Exception) {
             Result.failure(e)
         }

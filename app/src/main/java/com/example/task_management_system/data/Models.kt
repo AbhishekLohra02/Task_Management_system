@@ -4,24 +4,26 @@ data class User(
     val uid: String = "",
     val email: String = "",
     val name: String = "",
-    val role: String = "", // "SuperAdmin", "Manager", "User"
-    val teamId: String? = null // Null for SuperAdmin, or if not assigned yet
+    val surname: String = "",
+    val address: String = "",
+    val role: String = "",
+    val teamId: String? = null
 )
 
 data class Team(
     val id: String = "",
     val name: String = "",
-    val description: String = "", // Added description field
-    val managerId: String = "", // The manager leading this team
-    val members: List<String> = emptyList() // List of User UIDs
+    val description: String = "",
+    val managerId: String = "",
+    val members: List<String> = emptyList()
 )
 
 data class Task(
     val id: String = "",
     val title: String = "",
     val description: String = "",
-    val status: String = "To Do", // "To Do", "In Progress", "Done"
-    val assignedTo: String = "", // UID of the user working on it
-    val createdBy: String = "", // UID of the manager/admin who created it
+    val status: String = "To Do",
+    val assignedTo: String = "",
+    val createdBy: String = "",
     val userComment: String = ""
 )

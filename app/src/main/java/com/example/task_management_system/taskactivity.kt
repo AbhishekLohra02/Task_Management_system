@@ -6,10 +6,10 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
@@ -21,6 +21,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.task_management_system.data.Task
+import com.example.task_management_system.viewmodel.TaskViewModel
+import kotlinx.coroutines.launch
 
 // --- PALETTE DE COULEURS PROFESSIONNELLES ---
 val primaryColor = Color(0xFF0D47A1)
@@ -32,30 +36,41 @@ val textColorPrimary = Color(0xFF212121)
 val textColorSecondary = Color(0xFF757575)
 val accentColorError = Color(0xFFD32F2F)
 
-data class TaskDetail(
-    val title: String,
-    val description: String,
-    var status: String,
-    var userComment: String
-)
-
 @Composable
 fun TaskDetailScreen(
-    onLogout: () -> Unit = {}
+    taskId: String,
+    onBack: () -> Unit = {},
+    onLogout: () -> Unit = {},
+    viewModel: TaskViewModel = viewModel()
 ) {
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
+    
+    val tasks by viewModel.tasks.collectAsState()
+    val isLoading by viewModel.isLoading.collectAsState()
+    val errorMessage by viewModel.errorMessage.collectAsState()
+
+    // Load real task data from the ViewModel
     var task by remember {
         mutableStateOf(
-            TaskDetail(
-                title = "TASK: Mobile Project",
-                description = "You have to submit the Mobile application Project before Christmas break",
-                status = "In-Progress",
-                userComment = ""
+            Task(
+                id = taskId,
+                title = "Loading...",
+                description = "Please wait...",
+                status = "To Do"
             )
         )
     }
 
+    LaunchedEffect(tasks) {
+        tasks.find { it.id == taskId }?.let {
+            task = it
+        }
+    }
+
     Scaffold(
         containerColor = backgroundColor,
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         topBar = {
             CenterAlignedTopAppBar(
                 title = {
@@ -64,6 +79,15 @@ fun TaskDetailScreen(
                         color = onPrimaryColor,
                         fontWeight = FontWeight.Bold
                     )
+                },
+                navigationIcon = {
+                    IconButton(onClick = onBack) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Back",
+                            tint = onPrimaryColor
+                        )
+                    }
                 },
                 actions = {
                     TextButton(onClick = onLogout) {
@@ -76,91 +100,102 @@ fun TaskDetailScreen(
             )
         }
     ) { innerPadding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-                .padding(horizontal = 24.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text(
-                text = task.title,
-                color = primaryColor,
-                fontWeight = FontWeight.Bold,
-                fontSize = 24.sp,
+        if (isLoading) {
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator(color = primaryColor)
+            }
+        } else {
+            Column(
                 modifier = Modifier
-                    .padding(top = 24.dp)
-                    .drawBehind {
-                        val startColor = secondaryColor
-                        val endColor = Color.Transparent
-                        drawRect(
-                            brush = Brush.horizontalGradient(colors = listOf(startColor, endColor)),
-                            topLeft = Offset(0f, size.height),
-                            size = Size(size.width, 3.dp.toPx())
+                    .fillMaxSize()
+                    .padding(innerPadding)
+                    .padding(horizontal = 24.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    text = task.title,
+                    color = primaryColor,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 24.sp,
+                    modifier = Modifier
+                        .padding(top = 24.dp)
+                        .drawBehind {
+                            val startColor = secondaryColor
+                            val endColor = Color.Transparent
+                            drawRect(
+                                brush = Brush.horizontalGradient(colors = listOf(startColor, endColor)),
+                                topLeft = Offset(0f, size.height),
+                                size = Size(size.width, 3.dp.toPx())
+                            )
+                        }
+                )
+
+                Spacer(modifier = Modifier.height(30.dp))
+
+                LabeledSection(
+                    label = "Tasks Description",
+                    content = {
+                        Text(
+                            text = task.description,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            color = textColorPrimary
                         )
                     }
-            )
+                )
 
-            Spacer(modifier = Modifier.height(30.dp))
+                Spacer(modifier = Modifier.height(30.dp))
 
-            LabeledSection(
-                label = "Tasks Description",
-                content = {
-                    Text(
-                        text = task.description,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp),
-                        color = textColorPrimary
-                    )
+                StatusSelector(
+                    selectedStatus = task.status,
+                    onStatusChange = { newStatus ->
+                        task = task.copy(status = newStatus)
+                    }
+                )
+
+                Spacer(modifier = Modifier.height(30.dp))
+
+                LabeledSection(
+                    label = "User Comments",
+                    content = {
+                        OutlinedTextField(
+                            value = task.userComment,
+                            onValueChange = { newComment ->
+                                task = task.copy(userComment = newComment)
+                            },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(120.dp),
+                            colors = TextFieldDefaults.outlinedTextFieldColors(
+                                focusedBorderColor = primaryColor,
+                                unfocusedBorderColor = textColorSecondary.copy(alpha = 0.5f),
+                                cursorColor = primaryColor
+                            ),
+                            placeholder = { Text("Enter your comments...", color = textColorSecondary) }
+                        )
+                    }
+                )
+
+                Spacer(modifier = Modifier.weight(1f))
+
+                Button(
+                    onClick = {
+                        scope.launch {
+                            viewModel.updateTaskStatus(task.id, task.status)
+                            snackbarHostState.showSnackbar("Progress saved successfully")
+                        }
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = primaryColor,
+                        contentColor = onPrimaryColor
+                    ),
+                    modifier = Modifier
+                        .padding(bottom = 32.dp)
+                        .fillMaxWidth()
+                ) {
+                    Text("Save", fontWeight = FontWeight.SemiBold)
                 }
-            )
-
-            Spacer(modifier = Modifier.height(30.dp))
-
-            StatusSelector(
-                selectedStatus = task.status,
-                onStatusChange = { newStatus ->
-                    task = task.copy(status = newStatus)
-                }
-            )
-
-            Spacer(modifier = Modifier.height(30.dp))
-
-            LabeledSection(
-                label = "User Comments",
-                content = {
-                    OutlinedTextField(
-                        value = task.userComment,
-                        onValueChange = { newComment ->
-                            task = task.copy(userComment = newComment)
-                        },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(120.dp),
-                        colors = TextFieldDefaults.outlinedTextFieldColors(
-                            focusedBorderColor = primaryColor,
-                            unfocusedBorderColor = textColorSecondary.copy(alpha = 0.5f),
-                            cursorColor = primaryColor
-                        ),
-                        placeholder = { Text("Enter your comments...", color = textColorSecondary) }
-                    )
-                }
-            )
-
-            Spacer(modifier = Modifier.weight(1f))
-
-            Button(
-                onClick = { /* TODO: Logique de sauvegarde */ },
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = primaryColor,
-                    contentColor = onPrimaryColor
-                ),
-                modifier = Modifier
-                    .padding(bottom = 32.dp)
-                    .fillMaxWidth()
-            ) {
-                Text("Save", fontWeight = FontWeight.SemiBold)
             }
         }
     }
@@ -234,5 +269,5 @@ fun StatusSelector(selectedStatus: String, onStatusChange: (String) -> Unit) {
 @Preview(showBackground = true)
 @Composable
 fun TaskDetailScreenPreview() {
-    TaskDetailScreen()
+    TaskDetailScreen(taskId = "1")
 }
