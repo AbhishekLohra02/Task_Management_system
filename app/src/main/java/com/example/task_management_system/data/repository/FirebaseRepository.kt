@@ -12,7 +12,7 @@ class FirebaseRepository {
     private val auth: FirebaseAuth = FirebaseAuth.getInstance()
     private val firestore: FirebaseFirestore = FirebaseFirestore.getInstance()
 
-
+    // --- Authentication ---
 
     suspend fun login(email: String, password: String): Result<User> {
         return try {
@@ -79,7 +79,6 @@ class FirebaseRepository {
 
     suspend fun deleteUser(uid: String): Result<Boolean> {
         return try {
-            // Note: This only deletes from Firestore. Deleting from Auth requires Admin SDK or Cloud Functions
             firestore.collection("users").document(uid).delete().await()
             Result.success(true)
         } catch (e: Exception) {
@@ -146,6 +145,16 @@ class FirebaseRepository {
         }
     }
 
+    suspend fun getTaskById(taskId: String): Result<Task?> {
+        return try {
+            val snapshot = firestore.collection("tasks").document(taskId).get().await()
+            val task = snapshot.toObject(Task::class.java)
+            Result.success(task)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
     suspend fun getTasksForUser(userId: String): Result<List<Task>> {
         return try {
             val snapshot = firestore.collection("tasks")
@@ -154,6 +163,29 @@ class FirebaseRepository {
                 .await()
             val tasks = snapshot.toObjects(Task::class.java)
             Result.success(tasks)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun getTasksByTeamForUser(userId: String, teamId: String): Result<List<Task>> {
+        return try {
+            val snapshot = firestore.collection("tasks")
+                .whereEqualTo("assignedTo", userId)
+                .whereEqualTo("teamId", teamId)
+                .get()
+                .await()
+            val tasks = snapshot.toObjects(Task::class.java)
+            Result.success(tasks)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun updateTask(task: Task): Result<Boolean> {
+        return try {
+            firestore.collection("tasks").document(task.id).set(task).await()
+            Result.success(true)
         } catch (e: Exception) {
             Result.failure(e)
         }

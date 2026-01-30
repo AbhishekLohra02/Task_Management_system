@@ -6,7 +6,7 @@ data class User(
     val name: String = "",
     val surname: String = "",
     val address: String = "",
-    val role: String = "",
+    val role: String = "", // "SuperAdmin", "Manager", "User"
     val teamId: String? = null
 )
 
@@ -20,6 +20,7 @@ data class Team(
 
 data class Task(
     val id: String = "",
+    val teamId: String = "", // Added teamId to link task to a specific team
     val title: String = "",
     val description: String = "",
     val status: String = "To Do",
