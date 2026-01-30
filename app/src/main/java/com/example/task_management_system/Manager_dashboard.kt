@@ -54,15 +54,6 @@ fun ManagerDashboardScreen(
                         fontWeight = FontWeight.Bold
                     )
                 },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back",
-                            tint = Color.White
-                        )
-                    }
-                },
                 actions = {
                     TextButton(onClick = onLogout) {
                         Text("Logout", color = Color.White)
@@ -201,6 +192,11 @@ fun TeamProgressScreen(
     viewModel: ManagerViewModel = viewModel()
 ) {
     val tasks by viewModel.teamTasks.collectAsState()
+    val users by viewModel.users.collectAsState()
+
+    LaunchedEffect(Unit) {
+        viewModel.fetchAllData()
+    }
 
     Scaffold(
         topBar = {
@@ -221,9 +217,13 @@ fun TeamProgressScreen(
             
             LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 items(tasks) { task ->
+                    val user = users.find { it.uid == task.assignedTo }
                     Card(modifier = Modifier.fillMaxWidth()) {
                         Column(modifier = Modifier.padding(16.dp)) {
-                            Text("User ID: ${task.assignedTo}", fontWeight = FontWeight.SemiBold)
+                            Text(
+                                text = "User: ${user?.let { "${it.name} ${it.surname}" } ?: task.assignedTo}",
+                                fontWeight = FontWeight.SemiBold
+                            )
                             Text("Task: ${task.title}")
                             Text("Status: ${task.status}", color = if (task.status == "Done") Color(0xFF2E7D32) else Color.Red)
                         }

@@ -12,6 +12,23 @@ class FirebaseRepository {
     private val auth: FirebaseAuth = FirebaseAuth.getInstance()
     private val firestore: FirebaseFirestore = FirebaseFirestore.getInstance()
 
+    // Secondary Firebase Auth instance for creating users without logging out the manager
+    private var secondaryAuth: FirebaseAuth? = null
+
+    private fun getSecondaryAuth(): FirebaseAuth {
+        if (secondaryAuth == null) {
+            val context = com.google.firebase.FirebaseApp.getInstance().applicationContext
+            val options = com.google.firebase.FirebaseApp.getInstance().options
+            val secondaryApp = try {
+                com.google.firebase.FirebaseApp.getInstance("Secondary")
+            } catch (e: Exception) {
+                com.google.firebase.FirebaseApp.initializeApp(context, options, "Secondary")
+            }
+            secondaryAuth = FirebaseAuth.getInstance(secondaryApp)
+        }
+        return secondaryAuth!!
+    }
+
     // --- Authentication ---
 
     suspend fun login(email: String, password: String): Result<User> {
@@ -42,11 +59,17 @@ class FirebaseRepository {
 
     suspend fun registerUser(user: User, password: String): Result<Boolean> {
         return try {
-            val authResult = auth.createUserWithEmailAndPassword(user.email, password).await()
+            val managerId = auth.currentUser?.uid ?: ""
+            val sAuth = getSecondaryAuth()
+            
+            val authResult = sAuth.createUserWithEmailAndPassword(user.email, password).await()
             val uid = authResult.user?.uid ?: throw Exception("Failed to create user")
 
-            val newUser = user.copy(uid = uid)
+            val newUser = user.copy(uid = uid, createdBy = managerId)
             firestore.collection("users").document(uid).set(newUser).await()
+            
+            // Sign out from the secondary instance to keep it clean
+            sAuth.signOut()
 
             Result.success(true)
         } catch (e: Exception) {
@@ -99,6 +122,29 @@ class FirebaseRepository {
         }
     }
 
+    suspend fun getUserById(uid: String): Result<User?> {
+        return try {
+            val snapshot = firestore.collection("users").document(uid).get().await()
+            val user = snapshot.toObject(User::class.java)
+            Result.success(user)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun getUsersByCreator(creatorId: String): Result<List<User>> {
+        return try {
+            val snapshot = firestore.collection("users")
+                .whereEqualTo("createdBy", creatorId)
+                .get()
+                .await()
+            val users = snapshot.toObjects(User::class.java)
+            Result.success(users)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
     // --- Team Management ---
 
     suspend fun createTeam(teamName: String, managerId: String): Result<Boolean> {
@@ -115,6 +161,19 @@ class FirebaseRepository {
     suspend fun getTeams(): Result<List<Team>> {
         return try {
             val snapshot = firestore.collection("teams").get().await()
+            val teams = snapshot.toObjects(Team::class.java)
+            Result.success(teams)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun getTeamsByManager(managerId: String): Result<List<Team>> {
+        return try {
+            val snapshot = firestore.collection("teams")
+                .whereEqualTo("managerId", managerId)
+                .get()
+                .await()
             val teams = snapshot.toObjects(Team::class.java)
             Result.success(teams)
         } catch (e: Exception) {

@@ -7,7 +7,8 @@ data class User(
     val surname: String = "",
     val address: String = "",
     val role: String = "", // "SuperAdmin", "Manager", "User"
-    val teamId: String? = null
+    val teamId: String? = null,
+    val createdBy: String = ""
 )
 
 data class Team(

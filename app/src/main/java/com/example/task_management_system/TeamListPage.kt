@@ -26,6 +26,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.task_management_system.data.Team
+import com.example.task_management_system.data.User
 import com.example.task_management_system.viewmodel.TeamListViewModel
 
 // --- COULEURS ---
@@ -43,6 +44,8 @@ fun TeamListScreen(
 ) {
     val teams by viewModel.teams.collectAsState()
 
+    val users by viewModel.users.collectAsState()
+
     Scaffold(
         containerColor = teamBackgroundColor,
         topBar = {
@@ -53,15 +56,6 @@ fun TeamListScreen(
                         color = Color.White,
                         fontWeight = FontWeight.Bold
                     )
-                },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back",
-                            tint = Color.White
-                        )
-                    }
                 },
                 actions = {
                     TextButton(onClick = onLogout) {
@@ -91,11 +85,7 @@ fun TeamListScreen(
                     .drawBehind {
                         val startColor = teamSecondaryColor
                         val endColor = Color.Transparent
-                        drawRect(
-                            brush = Brush.horizontalGradient(colors = listOf(startColor, endColor)),
-                            topLeft = Offset(0f, size.height),
-                            size = Size(size.width, 3.dp.toPx())
-                        )
+                        drawRect(brush = Brush.horizontalGradient(colors = listOf(startColor, endColor)), topLeft = Offset(0f, size.height), size = Size(size.width, 3.dp.toPx()))
                     }
             )
 
@@ -105,7 +95,7 @@ fun TeamListScreen(
                 contentPadding = PaddingValues(bottom = 32.dp)
             ) {
                 items(teams) { team ->
-                    TeamItem(team = team) {
+                    TeamItem(team = team, allUsers = users) {
                         onTeamSelected(team)
                     }
                 }
@@ -115,7 +105,12 @@ fun TeamListScreen(
 }
 
 @Composable
-fun TeamItem(team: Team, onClick: () -> Unit) {
+fun TeamItem(team: Team, allUsers: List<User>, onClick: () -> Unit) {
+    val manager = allUsers.find { u -> u.uid == team.managerId }
+    val members = allUsers.filter { u -> u.teamId == team.id || team.members.contains(u.uid) }
+    
+    val managerName = manager?.let { m -> "${m.name} ${m.surname}" } ?: "Unknown (${team.managerId})"
+    
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -124,33 +119,43 @@ fun TeamItem(team: Team, onClick: () -> Unit) {
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White)
     ) {
-        Row(
-            modifier = Modifier
-                .padding(20.dp)
-                .fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(12.dp)
-                    .clip(RoundedCornerShape(50))
-                    .background(teamSecondaryColor)
+        Column(modifier = Modifier.padding(20.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Box(modifier = Modifier.size(12.dp).clip(RoundedCornerShape(50)).background(teamSecondaryColor))
+                Spacer(modifier = Modifier.width(16.dp))
+                Text(text = team.name, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = teamPrimaryColor)
+            }
+            
+            Spacer(modifier = Modifier.height(8.dp))
+            
+            Text(
+                text = "Manager: $managerName",
+                style = MaterialTheme.typography.bodyMedium,
+                fontWeight = FontWeight.SemiBold,
+                color = Color.DarkGray
             )
-            Spacer(modifier = Modifier.width(16.dp))
-            Column {
+
+            if (members.isNotEmpty()) {
+                Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    text = team.name,
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = teamPrimaryColor
+                    text = "Members:",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = Color.Gray,
+                    fontWeight = FontWeight.Bold
                 )
-                if (team.description.isNotBlank()) {
+                for (user in members) {
                     Text(
-                        text = team.description,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = Color.Gray
+                        text = "• ${user.name} ${user.surname} (${user.role})",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = Color.Gray,
+                        modifier = Modifier.padding(start = 8.dp)
                     )
                 }
+            }
+
+            if (team.description.isNotBlank()) {
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(text = team.description, style = MaterialTheme.typography.bodyMedium, color = Color.Gray)
             }
         }
     }

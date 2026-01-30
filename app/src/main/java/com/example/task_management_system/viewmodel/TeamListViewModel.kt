@@ -17,6 +17,9 @@ class TeamListViewModel : ViewModel() {
     private val _teams = MutableStateFlow<List<Team>>(emptyList())
     val teams: StateFlow<List<Team>> = _teams.asStateFlow()
 
+    private val _users = MutableStateFlow<List<User>>(emptyList())
+    val users: StateFlow<List<User>> = _users.asStateFlow()
+
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
 
@@ -31,12 +34,39 @@ class TeamListViewModel : ViewModel() {
         viewModelScope.launch {
             _isLoading.value = true
             _errorMessage.value = null
-            val result = repository.getTeams()
-            if (result.isSuccess) {
-                _teams.value = result.getOrDefault(emptyList())
-            } else {
-                _errorMessage.value = result.exceptionOrNull()?.message ?: "Failed to fetch teams"
+            
+            val currentUserId = repository.getCurrentUserId()
+            if (currentUserId != null) {
+                val userResult = repository.getUserById(currentUserId)
+                val currentUser = userResult.getOrNull()
+
+                val result = repository.getTeams()
+                val usersResult = repository.getUsers()
+                
+                if (usersResult.isSuccess) {
+                    _users.value = usersResult.getOrDefault(emptyList())
+                }
+
+                if (result.isSuccess) {
+                    val allTeams = result.getOrDefault(emptyList())
+                    if (currentUser?.role == "SuperAdmin") {
+                        _teams.value = allTeams
+                    } else {
+                        // Filter teams for Managers and Users:
+                        // 1. Where user is a manager
+                        // 2. Where user is in members list
+                        // 3. Where user's teamId matches the team's id
+                        _teams.value = allTeams.filter { team ->
+                            team.managerId == currentUserId || 
+                            team.members.contains(currentUserId) ||
+                            team.id == currentUser?.teamId
+                        }
+                    }
+                } else {
+                    _errorMessage.value = result.exceptionOrNull()?.message ?: "Failed to fetch teams"
+                }
             }
+            
             _isLoading.value = false
         }
     }

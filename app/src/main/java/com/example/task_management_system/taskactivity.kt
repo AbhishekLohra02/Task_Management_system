@@ -46,25 +46,28 @@ fun TaskDetailScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
     
-    val tasks by viewModel.tasks.collectAsState()
+    val selectedTask by viewModel.selectedTask.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
     val errorMessage by viewModel.errorMessage.collectAsState()
 
-    // Load real task data from the ViewModel
-    var task by remember {
-        mutableStateOf(
-            Task(
-                id = taskId,
-                title = "Loading...",
-                description = "Please wait...",
-                status = "To Do"
-            )
-        )
+    // Local state for edits
+    var taskTitle by remember { mutableStateOf("Loading...") }
+    var taskDescription by remember { mutableStateOf("Please wait...") }
+    var taskStatus by remember { mutableStateOf("To Do") }
+    var taskUserComment by remember { mutableStateOf("") }
+
+    // Fetch task on launch
+    LaunchedEffect(taskId) {
+        viewModel.fetchTaskById(taskId)
     }
 
-    LaunchedEffect(tasks) {
-        tasks.find { it.id == taskId }?.let {
-            task = it
+    // Sync local state when selectedTask is loaded/updated
+    LaunchedEffect(selectedTask) {
+        selectedTask?.let {
+            taskTitle = it.title
+            taskDescription = it.description
+            taskStatus = it.status
+            taskUserComment = it.userComment
         }
     }
 
@@ -113,7 +116,7 @@ fun TaskDetailScreen(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
-                    text = task.title,
+                    text = taskTitle,
                     color = primaryColor,
                     fontWeight = FontWeight.Bold,
                     fontSize = 24.sp,
@@ -136,7 +139,7 @@ fun TaskDetailScreen(
                     label = "Tasks Description",
                     content = {
                         Text(
-                            text = task.description,
+                            text = taskDescription,
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(16.dp),
@@ -148,9 +151,9 @@ fun TaskDetailScreen(
                 Spacer(modifier = Modifier.height(30.dp))
 
                 StatusSelector(
-                    selectedStatus = task.status,
+                    selectedStatus = taskStatus,
                     onStatusChange = { newStatus ->
-                        task = task.copy(status = newStatus)
+                        taskStatus = newStatus
                     }
                 )
 
@@ -160,9 +163,9 @@ fun TaskDetailScreen(
                     label = "User Comments",
                     content = {
                         OutlinedTextField(
-                            value = task.userComment,
+                            value = taskUserComment,
                             onValueChange = { newComment ->
-                                task = task.copy(userComment = newComment)
+                                taskUserComment = newComment
                             },
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -182,7 +185,7 @@ fun TaskDetailScreen(
                 Button(
                     onClick = {
                         scope.launch {
-                            viewModel.updateTaskStatus(task.id, task.status)
+                            viewModel.updateTaskStatus(taskId, taskStatus)
                             snackbarHostState.showSnackbar("Progress saved successfully")
                         }
                     },

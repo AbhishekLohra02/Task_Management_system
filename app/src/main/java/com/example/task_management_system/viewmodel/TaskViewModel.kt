@@ -86,10 +86,18 @@ class TaskViewModel : ViewModel() {
         viewModelScope.launch {
             val result = repository.updateTaskStatus(taskId, newStatus)
             if (result.isSuccess) {
+                // Update specific task in the list
                 val currentTasks = _tasks.value.map {
                     if (it.id == taskId) it.copy(status = newStatus) else it
                 }
                 _tasks.value = currentTasks
+                
+                // Also update selectedTask if it matches the taskId
+                _selectedTask.value?.let { currentSelected ->
+                    if (currentSelected.id == taskId) {
+                        _selectedTask.value = currentSelected.copy(status = newStatus)
+                    }
+                }
             } else {
                 _errorMessage.value = result.exceptionOrNull()?.message ?: "Failed to update task status"
             }

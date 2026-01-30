@@ -87,7 +87,41 @@ fun CreateUserScreen(
                 visualTransformation = PasswordVisualTransformation()
             )
             OutlinedTextField(value = userAddress, onValueChange = { userAddress = it }, label = { Text("Address") }, modifier = Modifier.fillMaxWidth())
-            OutlinedTextField(value = teamId, onValueChange = { teamId = it }, label = { Text("Team ID") }, modifier = Modifier.fillMaxWidth())
+            
+            // Team ID Dropdown
+            var expanded by remember { mutableStateOf(false) }
+            val teams by viewModel.teams.collectAsState()
+            
+            ExposedDropdownMenuBox(
+                expanded = expanded,
+                onExpandedChange = { expanded = !expanded },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                OutlinedTextField(
+                    modifier = Modifier.menuAnchor().fillMaxWidth(),
+                    readOnly = true,
+                    value = teams.find { it.id == teamId }?.name ?: "Select Team",
+                    onValueChange = {},
+                    label = { Text("Team") },
+                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+                    colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors()
+                )
+                ExposedDropdownMenu(
+                    expanded = expanded,
+                    onDismissRequest = { expanded = false }
+                ) {
+                    teams.forEach { team ->
+                        DropdownMenuItem(
+                            text = { Text(team.name) },
+                            onClick = {
+                                teamId = team.id
+                                expanded = false
+                            },
+                            contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding
+                        )
+                    }
+                }
+            }
 
             Spacer(modifier = Modifier.weight(1f))
             

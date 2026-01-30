@@ -79,6 +79,7 @@ fun AppNavigation() {
                 },
                 onCreateManager = { navController.navigate("createManager") },
                 onDeleteManager = { navController.navigate("listeManager") },
+                onViewTeamList = { navController.navigate("teamList") },
                 onLogout = {
                     navController.navigate("signin") {
                         popUpTo("superAdminDashboard") { inclusive = true }
@@ -154,9 +155,7 @@ fun AppNavigation() {
         composable("teamList") {
             TeamListScreen(
                 onBack = { 
-                    navController.navigate("signin") {
-                        popUpTo("teamList") { inclusive = true }
-                    }
+                    navController.popBackStack()
                 },
                 onTeamSelected = { team ->
                     navController.navigate("userTasks/${team.id}")

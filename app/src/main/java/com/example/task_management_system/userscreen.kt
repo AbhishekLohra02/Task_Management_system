@@ -45,11 +45,11 @@ fun UserTasksScreen(
     val tasks by viewModel.tasks.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
 
-    // Fetch tasks for the current user when the screen is shown
-    LaunchedEffect(Unit) {
+    // Fetch tasks for the current user and team when the screen is shown
+    LaunchedEffect(teamId) {
         val currentUserId = FirebaseAuth.getInstance().currentUser?.uid
         if (currentUserId != null) {
-            viewModel.fetchTasksForUser(currentUserId)
+            viewModel.fetchTasksByTeamForUser(currentUserId, teamId)
         }
     }
 

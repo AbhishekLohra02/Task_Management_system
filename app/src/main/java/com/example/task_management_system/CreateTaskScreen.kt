@@ -119,10 +119,12 @@ fun CreateTaskScreen(
                 Button(
                     onClick = {
                         if (taskTitle.isNotBlank() && assignedToUserId.isNotBlank()) {
+                            val assignedUser = users.find { it.uid == assignedToUserId }
                             val newTask = Task(
                                 title = taskTitle,
                                 description = taskDescription,
                                 assignedTo = assignedToUserId,
+                                teamId = assignedUser?.teamId ?: "",
                                 status = "To Do"
                             )
                             viewModel.createTask(newTask)

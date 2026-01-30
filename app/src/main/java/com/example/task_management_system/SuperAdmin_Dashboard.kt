@@ -33,24 +33,15 @@ fun SuperAdminScreen(
     onBack: () -> Unit,
     onCreateManager: () -> Unit,
     onDeleteManager: () -> Unit,
+    onViewTeamList: () -> Unit,
     onLogout: () -> Unit,
     viewModel: SuperAdminViewModel = viewModel()
 ) {
-    var screenState by remember { mutableStateOf("dashboard") }
-    var selectedTeam by remember { mutableStateOf<Team?>(null) }
-    
-    val teams by viewModel.teams.collectAsState()
-
     Scaffold(
         containerColor = adminBackgroundColor,
         topBar = {
             CenterAlignedTopAppBar(
                 title = { Text("Tasks:", color = Color.White, fontWeight = FontWeight.Bold) },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = Color.White)
-                    }
-                },
                 actions = {
                     TextButton(onClick = onLogout) { Text("Logout", color = Color.White) }
                 },
@@ -59,31 +50,11 @@ fun SuperAdminScreen(
         }
     ) { padding ->
         Column(modifier = Modifier.fillMaxSize().padding(padding).padding(horizontal = 24.dp)) {
-            when (screenState) {
-                "dashboard" -> {
-                    SuperAdminDashboardContent(
-                        onCreateManager = onCreateManager,
-                        onDeleteManager = onDeleteManager,
-                        onViewTeams = { screenState = "teams" }
-                    )
-                }
-                "teams" -> {
-                    AdminTeamListScreen(
-                        teams = teams,
-                        onTeamClick = { team ->
-                            selectedTeam = team
-                            screenState = "teamDetail"
-                        },
-                        onBackToDashboard = { screenState = "dashboard" }
-                    )
-                }
-                "teamDetail" -> {
-                    AdminTeamDetailScreen(
-                        team = selectedTeam!!,
-                        onBack = { screenState = "teams" }
-                    )
-                }
-            }
+            SuperAdminDashboardContent(
+                onCreateManager = onCreateManager,
+                onDeleteManager = onDeleteManager,
+                onViewTeams = onViewTeamList
+            )
         }
     }
 }
@@ -136,46 +107,8 @@ fun AdminActionCard(text: String, onClick: () -> Unit, colors: ButtonColors) {
     }
 }
 
-@Composable
-fun AdminTeamListScreen(teams: List<Team>, onTeamClick: (Team) -> Unit, onBackToDashboard: () -> Unit) {
-    Column(modifier = Modifier.fillMaxSize().padding(vertical = 24.dp)) {
-        TextButton(onClick = onBackToDashboard) { Text("< Dashboard", color = adminSecondaryColor) }
-        Text("TEAM OVERVIEW", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = adminPrimaryColor, modifier = Modifier.padding(vertical = 16.dp))
-        LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            items(teams) { team ->
-                Card(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(12.dp), colors = CardDefaults.cardColors(containerColor = Color.White)) {
-                    ListItem(
-                        headlineContent = { Text(team.name, fontWeight = FontWeight.Bold) },
-                        supportingContent = { Text(team.description) },
-                        trailingContent = {
-                            Button(onClick = { onTeamClick(team) }, colors = ButtonDefaults.buttonColors(containerColor = adminSecondaryColor)) {
-                                Text("Details")
-                            }
-                        }
-                    )
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun AdminTeamDetailScreen(team: Team, onBack: () -> Unit) {
-    Column(modifier = Modifier.fillMaxSize().padding(vertical = 32.dp)) {
-        TextButton(onClick = onBack) { Text("< Back to Teams", color = adminSecondaryColor) }
-        Card(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(16.dp), colors = CardDefaults.cardColors(containerColor = Color.White)) {
-            Column(modifier = Modifier.padding(24.dp)) {
-                Text(team.name, fontSize = 24.sp, fontWeight = FontWeight.Bold, color = adminPrimaryColor)
-                Spacer(modifier = Modifier.height(16.dp))
-                Text("Description:", fontWeight = FontWeight.Bold, color = Color.Gray)
-                Text(team.description, fontSize = 16.sp)
-            }
-        }
-    }
-}
-
 @Preview(showBackground = true)
 @Composable
 fun SuperAdminPreview() {
-    SuperAdminScreen({}, {}, {}, {})
+    SuperAdminScreen({}, {}, {}, {}, {})
 }
